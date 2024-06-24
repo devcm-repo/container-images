@@ -1,23 +1,35 @@
-steps:
-  - name: Check out the repo
-    uses: actions/checkout@v3
+name: Release Charts
 
-  - name: Log in to Docker Hub
-    uses: docker/login-action@v2
-    with:
-      username: ${{ secrets.DOCKERHUB_USERNAME }}  # 配置dockerhub的认证，在Github项目主页 【Settings】 -> 【Secrets】 添加对应变量
-      password: ${{ secrets.DOCKERHUB_TOKEN }}
+on:
+  push:
+     tags:        
+      - release-*
 
-  - name: Extract metadata (tags, labels) for Docker
-    id: meta
-    uses: docker/metadata-action@v3  # 抽取项目信息，主要是镜像的tag
-    with:
-      images: kkkk24/chatgpt_academic
-
-  - name: Build and push Docker image
-    uses: docker/build-push-action@v4 # docker build & push
-    with:
-      context: .
-      push: true
-      tags: ${{ steps.meta.outputs.tags }}
-      labels: ${{ steps.meta.outputs.labels }}
+jobs:
+  release:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+    
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }} 
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+        
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: devcm/
+        
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
